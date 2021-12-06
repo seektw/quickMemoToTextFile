@@ -37,18 +37,21 @@ def unzip_file(target_file, result_dir):
 def convert_to_text(target_file, result_file):
     """Extract content text from jlqm(json type) file And Create txt file"""
     # file check
-    with open(target_file, 'r', encoding="UTF-8") as json_file:
-        json_data = json.load(json_file)
-        f = open(result_file,'w')
-        j_mem = json_data["MemoObjectList"]
-        for i in range(len(j_mem)):
-            mem_dict = json_data["MemoObjectList"][i]
-            if 'DescRaw' in mem_dict.keys():
-                j_mem = json_data["MemoObjectList"][i]["DescRaw"]
-                f.write(j_mem+'\n')
-            else:
-                continue
-        f.close()
+    try:
+        with open(target_file, 'r', encoding="UTF-8") as json_file:
+            json_data = json.load(json_file)
+            f = open(result_file,'w',encoding="UTF-8")
+            j_mem = json_data["MemoObjectList"]
+            for i in range(len(j_mem)):
+                mem_dict = json_data["MemoObjectList"][i]
+                if 'DescRaw' in mem_dict.keys():
+                    j_mem = json_data["MemoObjectList"][i]["DescRaw"]
+                    f.write(j_mem+'\n')
+                else:
+                    continue
+            f.close()
+    except:
+        print(f"file convert error : {result_file}")
 
 
 # step 1 : Copy your target file (.lqm) to '/target' 
@@ -61,7 +64,7 @@ for (dirpath, dirnames, filenames) in walk(target_dir):
 
     for filename in filenames:
         if '.lqm' in filename:            
-            print(f"filename : {filename}")
+            #print(f"filename : {filename}")
             temp_dir = dirpath + '/temp'  
 
             # step 2 : Unzip target file to temp directory
