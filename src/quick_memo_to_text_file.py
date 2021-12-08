@@ -25,8 +25,10 @@ from os import walk, getcwd
 import zipfile
 import json
 import shutil
+from datetime import datetime
 
 print("start")
+
 
 def unzip_file(target_file, result_dir):
     """Unzip target_file to result_dir."""    
@@ -34,13 +36,20 @@ def unzip_file(target_file, result_dir):
     with zipfile.ZipFile(target_file) as unzip:
         unzip.extractall(result_dir)
 
-def convert_to_text(target_file, result_file):
+def convert_to_text(target_file, result_dir, result_file):
     """Extract content text from jlqm(json type) file And Create txt file"""
     # file check
     try:
         with open(target_file, 'r', encoding="UTF-8") as json_file:
             json_data = json.load(json_file)
-            f = open(result_file,'w',encoding="UTF-8")
+            # Extract create datetime of contend
+            c_time = str(json_data["Memo"]["CreatedTime"])[0:10]
+            m_time = str(json_data["Memo"]["ModifiedTime"])[0:10]
+            created_datetime = datetime.utcfromtimestamp(int(c_time)).strftime("%Y-%m-%d %H:%M")
+            modified_datetime = datetime.utcfromtimestamp(int(m_time)).strftime("%Y-%m-%d %H:%M")
+            result_file_name = result_dir + '/' + created_datetime[0:10]+'_'+result_file
+
+            f = open(result_file_name,'w',encoding="UTF-8")            
             j_mem = json_data["MemoObjectList"]
             for i in range(len(j_mem)):
                 mem_dict = json_data["MemoObjectList"][i]
@@ -49,6 +58,7 @@ def convert_to_text(target_file, result_file):
                     f.write(j_mem+'\n')
                 else:
                     continue
+            f.write('\ncreated: ' + created_datetime + '    modified: ' + modified_datetime + '\n')
             f.close()
     except:
         print(f"file convert error : {result_file}")
@@ -75,7 +85,7 @@ for (dirpath, dirnames, filenames) in walk(target_dir):
             result_file_name = filename + '.txt'
 
             # step 3 : Convert contents to text
-            convert_to_text(temp_dir + '/memoinfo.jlqm', result_dir + "/"+result_file_name)
+            convert_to_text(temp_dir + '/memoinfo.jlqm', result_dir, result_file_name)
 
             # step 4 : remove temp directory
             shutil.rmtree(temp_dir)  
